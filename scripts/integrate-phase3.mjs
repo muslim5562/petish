@@ -1,0 +1,9 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+function edit(p,f){writeFileSync(p,f(readFileSync(p,'utf8')));}
+edit('src/lib/db.ts',s=>s.replaceAll('dbV2','dbV3'));
+edit('src/app/layout.tsx',s=>s.replace('import "./pwa.css";','import "./pwa.css";\nimport "./sharing.css";'));
+edit('src/components/health-space.tsx',s=>s.replace('import HealthForm from','import ShareManager from "./share-manager";\nimport HealthForm from').replace('  const live = data.records.filter', '  if(view==="shares")return <ShareManager key={path.join("/")} pet={pet} data={data} create={path[1]==="new"}/>;\n  const live = data.records.filter').replace('["summary", "Summary"],','["summary", "Summary"],\n            ["shares", "Shared links"],').replace('Live owner-only view. No shareable health link is created.','Live owner-only view. Sharing creates a separate, selected snapshot.').replace('<div className="summary-control">','<div className="summary-control"><Link className="button primary" href={`${base}/shares/new`}>Share selected summary <ArrowUpRight size={17}/></Link>'));
+edit('next.config.ts',s=>s.replace('    return [',`    return [
+      {source:"/shared",headers:[{key:"Cache-Control",value:"private, no-store, max-age=0"},{key:"Referrer-Policy",value:"no-referrer"},{key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"},{key:"Content-Security-Policy",value:"default-src 'self'; script-src 'self' 'unsafe-inline'"+(process.env.NODE_ENV==='development'?" 'unsafe-eval'":"")+"; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}]},
+      {source:"/api/shared-summary",headers:[{key:"Referrer-Policy",value:"no-referrer"},{key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"}]},`));
+console.log('Phase 3 navigation, privacy headers and schema-aware database client integrated.');

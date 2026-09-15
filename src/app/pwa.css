@@ -1,0 +1,192 @@
+.install-page {
+  max-width: 1020px;
+  margin: auto;
+  padding: 40px 24px 70px;
+}
+.install-hero {
+  max-width: 650px;
+  margin: 40px auto 48px;
+  text-align: center;
+}
+.install-hero > img {
+  display: block;
+  margin: 0 auto 24px;
+  border-radius: 24px;
+  box-shadow: 0 14px 34px #38293f1a;
+}
+.install-hero .eyebrow {
+  display: block;
+}
+.install-hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.13;
+  letter-spacing: -0.05em;
+  margin: 18px 0;
+}
+.install-hero > p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #675f6b;
+  margin-bottom: 24px;
+}
+.install-status {
+  color: #65586c;
+  line-height: 1.6;
+}
+.install-guides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.install-guides section {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 28px;
+}
+.install-guides h2 {
+  margin: 14px 0;
+}
+.install-guides ol {
+  padding-left: 22px;
+  line-height: 1.75;
+  color: #5f5665;
+}
+.install-guides li + li {
+  margin-top: 14px;
+}
+.install-guides strong {
+  color: var(--ink);
+}
+.install-camera,
+.install-online {
+  display: flex;
+  gap: 20px;
+  background: #eee7f1;
+  border-radius: 22px;
+  padding: 28px;
+  margin-top: 24px;
+}
+.install-camera > svg,
+.install-online > svg {
+  flex: none;
+  margin-top: 4px;
+}
+.install-camera p,
+.install-online p {
+  line-height: 1.7;
+  color: #5f5665;
+}
+.install-online {
+  background: #f8eee6;
+}
+.install-footnote {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: #65586c;
+  font-size: 0.88rem;
+  margin: 26px 0;
+}
+.install-footnote svg {
+  flex: none;
+}
+.pwa-connection {
+  position: fixed;
+  z-index: 150;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(650px, calc(100% - 32px));
+  padding: 18px 22px;
+  background: #38293f;
+  color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px #0003;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pwa-connection > svg {
+  flex: none;
+}
+.pwa-connection p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 4px 0 0;
+  color: #fff;
+}
+.pwa-connection .button {
+  flex: none;
+}
+.pwa-install-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+@media (max-width: 650px) {
+  .install-page {
+    padding: 28px 20px 90px;
+  }
+  .install-guides {
+    grid-template-columns: 1fr;
+  }
+  .install-hero {
+    margin-top: 28px;
+  }
+  .install-camera,
+  .install-online {
+    padding: 22px;
+    gap: 12px;
+  }
+  .pwa-connection {
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    padding: 14px;
+  }
+  .pwa-update {
+    flex-wrap: wrap;
+  }
+  .pwa-update .button {
+    margin-left: 34px;
+  }
+  .install-guides section {
+    padding: 24px;
+  }
+}
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+  }
+  .bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .app-main {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+}
+
+.phone-preview-notice {
+  position: fixed;
+  z-index: 110;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #38293f;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  padding: 8px 12px;
+  line-height: 1.5;
+}
+.app-shell:has(.phone-preview-notice) {
+  padding-top: 40px;
+}
+.app-shell:has(.phone-preview-notice) .sidebar {
+  top: 40px;
+}
+.app-shell:has(.phone-preview-notice) .mobile-topbar {
+  top: 40px;
+}

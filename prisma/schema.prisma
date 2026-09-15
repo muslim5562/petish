@@ -1,0 +1,336 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+}
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  summarySnapshots HealthSummarySnapshot[]
+  sessions Session[]
+  accounts Account[]
+  pets Pet[]
+  ownerships PetOwnership[]
+  deletionRequest DeletionRequest?
+  @@map("user")
+}
+model Session {
+  id String @id @default(uuid()) @db.Uuid
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([userId])
+  @@map("session")
+}
+model Account {
+  id String @id @default(uuid()) @db.Uuid
+  accountId String
+  providerId String
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@map("account")
+}
+model Verification {
+  id String @id @default(uuid()) @db.Uuid
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([identifier])
+  @@map("verification")
+}
+enum Species {
+  CAT
+  DOG
+}
+enum Sex {
+  FEMALE
+  MALE
+  UNKNOWN
+}
+enum BirthPrecision {
+  EXACT
+  APPROXIMATE
+  YEAR
+  UNKNOWN
+}
+enum Visibility {
+  PRIVATE
+  PUBLIC
+}
+enum LifeStatus {
+  ACTIVE
+  ARCHIVED
+  DECEASED
+}
+model Pet {
+  id String @id @default(uuid()) @db.Uuid
+  publicId String @unique @default(uuid()) @db.Uuid
+  ownerId String @db.Uuid
+  owner User @relation(fields:[ownerId],references:[id])
+  name String
+  species Species
+  sex Sex @default(UNKNOWN)
+  breed String?
+  mixedBreed Boolean @default(false)
+  birthDate DateTime? @db.Date
+  birthPrecision BirthPrecision @default(UNKNOWN)
+  ageEntry String?
+  colour String?
+  markings String?
+  microchip String?
+  neutered String @default("UNKNOWN")
+  area String?
+  description String?
+  visibility Visibility @default(PRIVATE)
+  status LifeStatus @default(ACTIVE)
+  deceasedAt DateTime? @db.Date
+  mainImageId String? @unique @db.Uuid
+  mainImage PetImage? @relation("MainPhoto",fields:[mainImageId],references:[id],onDelete:SetNull)
+  images PetImage[] @relation("PetPhotos")
+  summarySnapshots HealthSummarySnapshot[]
+  healthRecords HealthRecord[]
+  healthContext PetHealthContext?
+  healthContextRevisions HealthContextRevision[]
+  ownerships PetOwnership[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([ownerId])
+}
+model PetOwnership {
+  summarySnapshots HealthSummarySnapshot[]
+  id String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet Pet @relation(fields:[petId],references:[id],onDelete:Cascade)
+  ownerId String @db.Uuid
+  owner User @relation(fields:[ownerId],references:[id])
+  startedAt DateTime @default(now())
+  endedAt DateTime?
+  @@index([petId,endedAt])
+}
+model PetImage {
+  id String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet Pet @relation("PetPhotos",fields:[petId],references:[id],onDelete:Cascade)
+  mainFor Pet? @relation("MainPhoto")
+  uploadedBy String @db.Uuid
+  objectKey String @unique
+  thumbKey String @unique
+  bytes Int
+  mime String @default("image/webp")
+  view String @default("UNSPECIFIED")
+  createdAt DateTime @default(now())
+  @@index([petId])
+}
+model AuditLog {
+  id String @id @default(uuid()) @db.Uuid
+  actorId String @db.Uuid
+  petId String? @db.Uuid
+  action String
+  createdAt DateTime @default(now())
+  @@index([actorId,createdAt])
+}
+model DeletionRequest {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @unique @db.Uuid
+  user User @relation(fields:[userId],references:[id])
+  requestedAt DateTime @default(now())
+  status String @default("REQUESTED")
+}
+
+enum HealthKind {
+  VISIT
+  MEDICATION
+  VACCINATION
+  PROBLEM
+  ALLERGY
+  PROCEDURE
+  DOCUMENT
+  NOTE
+}
+enum HealthSource {
+  OWNER_ENTERED
+  COPIED_VET_RECORD
+  IMPORTED_DOCUMENT
+}
+enum HealthDatePrecision {
+  EXACT
+  APPROXIMATE
+  UNKNOWN
+}
+enum TreatmentStatus {
+  ACTIVE
+  COMPLETED
+  STOPPED
+  UNKNOWN
+}
+enum ProblemStatus {
+  ACTIVE
+  RESOLVED
+  UNKNOWN
+}
+model HealthRecord {
+  id String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet Pet @relation(fields:[petId], references:[id], onDelete:Cascade)
+  kind HealthKind
+  title String
+  occurredOn DateTime? @db.Date
+  datePrecision HealthDatePrecision @default(UNKNOWN)
+  notes String?
+  sourceType HealthSource @default(OWNER_ENTERED)
+  sourceClinic String?
+  enteredBy String @db.Uuid
+  updatedBy String @db.Uuid
+  linkedEncounterId String? @db.Uuid
+  linkedEncounter HealthRecord? @relation("LinkedEncounter",fields:[linkedEncounterId],references:[id],onDelete:SetNull)
+  linkedItems HealthRecord[] @relation("LinkedEncounter")
+  encounter Encounter?
+  medication Medication?
+  vaccination Vaccination?
+  problem MedicalProblem?
+  allergy Allergy?
+  procedure Procedure?
+  attachments Attachment[]
+  revisions HealthRevision[]
+  version Int @default(1)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([petId,deletedAt,occurredOn])
+}
+model Encounter {
+  recordId String @id @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  vetSaid String?
+  treatment String?
+  outcome String?
+}
+model Medication {
+  recordId String @id @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  instructions String?
+  indication String?
+  startDate DateTime? @db.Date
+  endDate DateTime? @db.Date
+  status TreatmentStatus @default(UNKNOWN)
+}
+model Vaccination {
+  recordId String @id @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  nextDueDate DateTime? @db.Date
+  batch String?
+}
+model MedicalProblem {
+  recordId String @id @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  status ProblemStatus @default(UNKNOWN)
+}
+model Allergy {
+  recordId String @id @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  reaction String?
+  severity String @default("UNKNOWN")
+}
+model Procedure {
+  recordId String @id @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  outcome String?
+  major Boolean @default(false)
+}
+model HealthRevision {
+  id String @id @default(uuid()) @db.Uuid
+  recordId String @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  version Int
+  actorId String @db.Uuid
+  action String
+  snapshot Json
+  createdAt DateTime @default(now())
+  @@unique([recordId,version])
+}
+model Attachment {
+  id String @id @default(uuid()) @db.Uuid
+  recordId String @db.Uuid
+  record HealthRecord @relation(fields:[recordId],references:[id],onDelete:Cascade)
+  objectKey String @unique
+  thumbKey String? @unique
+  filename String
+  description String?
+  mime String
+  bytes Int
+  uploadedBy String @db.Uuid
+  transferable Boolean @default(false)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([recordId,deletedAt])
+}
+model PetHealthContext {
+  petId String @id @db.Uuid
+  pet Pet @relation(fields:[petId],references:[id],onDelete:Cascade)
+  emergencyNotes String?
+  allergyKnowledge String @default("UNKNOWN")
+  updatedBy String @db.Uuid
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model HealthContextRevision {
+  id String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet Pet @relation(fields:[petId],references:[id],onDelete:Cascade)
+  version Int
+  actorId String @db.Uuid
+  snapshot Json
+  createdAt DateTime @default(now())
+  @@unique([petId,version])
+}
+
+model HealthSummarySnapshot {
+  id String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet Pet @relation(fields:[petId],references:[id],onDelete:Cascade)
+  createdBy String @db.Uuid
+  creator User @relation(fields:[createdBy],references:[id],onDelete:Cascade)
+  custodyId String @db.Uuid
+  custody PetOwnership @relation(fields:[custodyId],references:[id],onDelete:Cascade)
+  content Json
+  selection Json
+  createdAt DateTime @default(now())
+  draftExpiresAt DateTime
+  share HealthSummaryShare?
+  @@index([petId,createdAt])
+}
+model HealthSummaryShare {
+  id String @id @default(uuid()) @db.Uuid
+  snapshotId String @unique @db.Uuid
+  snapshot HealthSummarySnapshot @relation(fields:[snapshotId],references:[id],onDelete:Cascade)
+  tokenHash String @unique @db.VarChar(64)
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+  revokedAt DateTime?
+  @@index([expiresAt,revokedAt])
+}

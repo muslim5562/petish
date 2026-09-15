@@ -1,0 +1,10 @@
+import 'dotenv/config';
+import {Client} from 'pg';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import path from 'node:path';
+let schema=readFileSync('prisma/schema.prisma','utf8');if(schema.includes('model HealthSummarySnapshot'))throw new Error('Phase 3 schema already exists.');
+const client=new Client({connectionString:process.env.DATABASE_URL});await client.connect();await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+const {rows}=await client.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");const snapshot={};for(const {tablename} of rows)snapshot[tablename]=(await client.query(`SELECT * FROM "${tablename.replaceAll('"','""')}"`)).rows;await client.query('COMMIT');await client.end();
+const dir=path.join('.local/backups','before-phase3-'+Date.now());mkdirSync(dir,{recursive:true});writeFileSync(path.join(dir,'records.json'),JSON.stringify(snapshot));writeFileSync(path.join(dir,'schema.prisma'),schema);
+schema=schema.replace('  sessions Session[]','  summarySnapshots HealthSummarySnapshot[]\n  sessions Session[]').replace('  healthRecords HealthRecord[]','  summarySnapshots HealthSummarySnapshot[]\n  healthRecords HealthRecord[]').replace('model PetOwnership {','model PetOwnership {\n  summarySnapshots HealthSummarySnapshot[]');
+writeFileSync('prisma/schema.prisma',schema+readFileSync(process.argv[2],'utf8'));console.log('Backed up local records and prepared additive Phase 3 schema.');

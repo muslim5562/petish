@@ -1,0 +1,15 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+function edit(p,f){writeFileSync(p,f(readFileSync(p,'utf8')));}
+edit('src/app/login/page.tsx',s=>s.replace('import Login from', 'import PreviewLogin from "@/components/preview-login";\nimport Login from').replace('export default function Page() {','export default function Page() {\n  if(process.env.PETISH_PHONE_PREVIEW==="true")return <PreviewLogin/>;'));
+edit('src/lib/storage.ts',s=>s.replace('const root = path.join(process.cwd(), ".local", "objects");','const root = process.env.PETISH_OBJECTS_ROOT || path.join(process.cwd(), ".local", "objects");'));
+edit('src/lib/mail.ts',s=>s.replace('export async function sendMail(to: string, subject: string, url: string) {','export async function sendMail(to: string, subject: string, url: string) {\n  if(process.env.PETISH_PHONE_PREVIEW==="true")throw new Error("Email is disabled in the shared phone preview.");'));
+edit('src/app/api/demo/route.ts',s=>s.replace('!["localhost", "127.0.0.1"].includes(new URL(req.url).hostname)','(!["localhost", "127.0.0.1"].includes(new URL(req.url).hostname) && !(process.env.PETISH_PHONE_PREVIEW==="true" && new URL(req.url).origin===process.env.BETTER_AUTH_URL))'));
+edit('src/app/api/local-mail/route.ts',s=>s.replace('export async function GET(req: Request) {','export async function GET(req: Request) {\n  if(process.env.PETISH_PHONE_PREVIEW==="true")return new Response(null,{status:404});'));
+edit('src/app/api/auth/[...all]/route.ts',s=>s.replace('export const { GET, POST } = toNextJsHandler(auth);',`const handlers=toNextJsHandler(auth);
+function allowed(req:Request){return process.env.PETISH_PHONE_PREVIEW!=="true"||['/api/auth/get-session','/api/auth/sign-out'].includes(new URL(req.url).pathname);}
+export async function GET(req:Request){return allowed(req)?handlers.GET(req):new Response(null,{status:404});}
+export async function POST(req:Request){return allowed(req)?handlers.POST(req):new Response(null,{status:404});}`));
+edit('src/app/app/[[...path]]/page.tsx',s=>s.replace('      demo={process.env.PETISH_DEMO === "true"}', '      demo={process.env.PETISH_DEMO === "true"}\n      phonePreview={process.env.PETISH_PHONE_PREVIEW === "true"}'));
+edit('src/components/petish-app.tsx',s=>s.replace('  demo,\n}: {','  demo,\n  phonePreview=false,\n}: {').replace('  demo: boolean;\n}) {','  demo: boolean;\n  phonePreview?: boolean;\n}) {').replace('    <div className="app-shell">','    <div className="app-shell">\n      {phonePreview&&<div className="phone-preview-notice">Shared phone-testing demo · Use sample photos and notes only.</div>}'));
+edit('src/app/pwa.css',s=>s+'\n.phone-preview-notice{position:fixed;z-index:110;top:0;left:0;right:0;background:#38293f;color:#fff;text-align:center;font-size:12px;padding:8px 12px;line-height:1.5}.app-shell:has(.phone-preview-notice){padding-top:40px}.app-shell:has(.phone-preview-notice) .sidebar{top:40px}.app-shell:has(.phone-preview-notice) .mobile-topbar{top:40px}\n');
+console.log('Explicit, isolated phone-preview mode integrated. Normal local and hosted modes are unchanged.');

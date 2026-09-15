@@ -1,0 +1,16 @@
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import sharp from 'sharp';
+function edit(p,f){writeFileSync(p,f(readFileSync(p,'utf8')));}
+edit('src/app/layout.tsx',s=>s.replace('import type { Metadata }','import type { Metadata, Viewport }').replace('import "./health.css";','import "./health.css";\nimport "./pwa.css";\nimport PwaProvider from "@/components/pwa-provider";').replace('icons: { icon: "/favicon.svg" },','icons: { icon: "/favicon.svg", apple: [{url:"/icons/apple-touch-icon.png",sizes:"180x180",type:"image/png"}] },\n  appleWebApp: {capable:true,title:"Petish",statusBarStyle:"default"},\n  applicationName:"Petish",').replace('export default function RootLayout', 'export const viewport:Viewport={width:"device-width",initialScale:1,viewportFit:"cover",themeColor:"#38293f"};\nexport default function RootLayout').replace('<body>{children}</body>','<body><PwaProvider>{children}</PwaProvider></body>'));
+edit('src/components/petish-app.tsx',s=>s.replace('<Link href="/credits">Photo credits</Link>','<Link href="/install">Install on your phone</Link>\n            <Link href="/credits">Photo credits</Link>'));
+edit('src/components/login.tsx',s=>s.replace('          {showDemo && (','          <Link className="pwa-install-link" href="/install">Install Petish on your phone</Link>\n          {showDemo && ('));
+edit('src/app/page.tsx',s=>s.replace('<footer className="landing-footer">','<footer className="landing-footer"><Link href="/install">Install on your phone</Link>'));
+edit('src/app/login/page.tsx',s=>s.replace('export default function Page()', 'export const dynamic="force-dynamic";\nexport default function Page()'));
+edit('next.config.ts',s=>s.replace('    return [','    return [\n      {source:"/sw.js",headers:[{key:"Content-Type",value:"application/javascript; charset=utf-8"},{key:"Cache-Control",value:"no-cache, no-store, must-revalidate"},{key:"Service-Worker-Allowed",value:"/"}]},\n      {source:"/app/:path*",headers:[{key:"Cache-Control",value:"private, no-store, max-age=0"}]},\n      {source:"/api/:path*",headers:[{key:"Cache-Control",value:"private, no-store, max-age=0"}]},'));
+// Catch only transport errors; do not report a failed save as queued or automatically retry it.
+for(const p of ['src/components/health-types.ts','src/components/petish-app.tsx'])edit(p,s=>s.replace('  const r = await fetch(url, {','  const r = await fetch(url, {').replace('          : JSON.stringify(body),\n  });','          : JSON.stringify(body),\n  }).catch(()=>{throw new Error("Could not reach Petish. Reconnect and retry. If a save was interrupted, check the record before adding it again.");});'));
+mkdirSync('public/icons',{recursive:true});const svg=readFileSync('public/favicon.svg');
+for(const [name,size] of [['petish-192',192],['petish-512',512],['apple-touch-icon',180]])await sharp(svg).resize(size,size).flatten({background:'#38293f'}).png().toFile(`public/icons/${name}.png`);
+const inside=svg.toString().replace('<svg ','<svg x="90" y="90" width="332" height="332" ');
+await sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" fill="#38293f"/>${inside}</svg>`)).png().toFile('public/icons/petish-maskable-512.png');
+console.log('Install manifest, existing-brand icons, connection handling and navigation integrated.');
