@@ -25,3 +25,11 @@ The link and QR are shown only when created. They cannot be recovered from store
 Automated integration and browser coverage verifies conservative defaults, explicit no-expiry consent, selected exclusions, immutable snapshots after live edits, hash-only storage, expiry boundaries, owner isolation, one-time issuance, expired drafts, revocation, custody-change rollback/commit, anonymous read-only access, clipboard fallback, QR rendering, responsive layouts and accessibility. The full Phase 1–3 regression suite must pass before delivery.
 
 Actual iOS/Android camera scanning and native share-sheet behavior require physical-device testing. The temporary phone site is a shared fictional demo, depends on this computer and tunnel staying online, and is not permanent hosting. Permanent deployment still requires hosted database/storage/email and operational setup.
+
+## PDF sharing
+
+The owner preview now offers Prepare PDF after a separate review acknowledgment. It exports only the selected frozen content, without creating a bearer link. Download PDF saves a real multi-page A4 file; Share PDF invokes the device file-sharing menu on a direct user click. WhatsApp and other targets appear only when installed and supported. Unsupported browsers and cancelled sharing leave the download available.
+
+The PDF is generated in browser memory with bundled licensed fonts; no health content goes to a PDF service or permanent browser storage. Leaving the preview releases its download URL. Exported files include source/capture dates, owner-maintained provenance, omission notices, page numbers, and a clear statement that copies do not expire or respond to link revocation. No raw record IDs, attachment URLs, or bearer tokens are included. Unsupported font characters cause an explicit error instead of silently altering medical text. The protected-link option preserves those original characters.
+
+Verification: automated browser checks cover actual PDF download, multi-page parsing, review consent, no link creation, file-sharing payload, cancellation, unsupported-browser fallback, responsive layout and accessibility. PDF text extraction and page rendering verify selected content and excluded identity fields. Physical WhatsApp delivery still requires a real phone; no message is automatically sent.

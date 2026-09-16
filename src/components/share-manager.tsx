@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import SummaryPdfActions from "./summary-pdf-actions";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -159,10 +160,10 @@ export default function ShareManager({
             <ShieldCheck size={15} />
             SHARE ONLY WHAT YOU CHOOSE
           </span>
-          <h1>{create ? "Create a share link." : "Shared links."}</h1>
+          <h1>{create ? "Share a health summary." : "Shared links."}</h1>
           <p>
             {create
-              ? "Choose the details, review the snapshot, then create its link."
+              ? "Choose the details, review the snapshot, then share a PDF or protected link."
               : "Manage protected snapshots shared for " + pet.name + "."}
           </p>
         </div>
@@ -407,6 +408,7 @@ export default function ShareManager({
             </figure>
           </div>
           <SummarySnapshot content={created.content} />
+          <SummaryPdfActions key={created.id} content={created.content} />
         </>
       ) : draft ? (
         <>
@@ -436,6 +438,7 @@ export default function ShareManager({
             </div>
           </div>
           <SummarySnapshot content={draft.content} />
+          <SummaryPdfActions key={draft.id} content={draft.content} />
           <form
             className="share-confirm"
             onSubmit={(e) => {
