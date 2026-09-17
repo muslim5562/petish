@@ -2504,3 +2504,9 @@ label > small {
     font-size: 0.75rem;
   }
 }
+
+.sidebar-signout { display:flex;align-items:center;gap:12px;padding:14px 20px;margin:12px 0;border:0;background:transparent;color:var(--ink,#392d40);font:inherit;cursor:pointer;text-align:left;border-radius:12px; }
+.sidebar-signout:hover {background:#f0eaf3;}
+.care-strays-home {margin-top:32px;}
+
+.rehoming-controls {display:grid;gap:12px;padding:16px;border:1px solid #e0d5e4;border-radius:14px;} .rehoming-controls label{display:grid;gap:8px;} .rehoming-controls input{width:100%;padding:12px;border:1px solid #c9bacf;border-radius:8px;font:inherit;}

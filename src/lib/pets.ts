@@ -20,6 +20,8 @@ export async function savePet(ownerId: string, input: unknown, id?: string) {
   const parsed = petInput.parse(input);
   const data = {
     ...parsed,
+    normalLocation:
+      parsed.careType === "CARE_STRAY" ? parsed.normalLocation : null,
     birthDate:
       parsed.birthPrecision === "UNKNOWN"
         ? null
@@ -49,7 +51,12 @@ export async function savePet(ownerId: string, input: unknown, id?: string) {
 export async function setPetState(
   ownerId: string,
   id: string,
-  input: { visibility?: string; status?: string; confirmed?: boolean },
+  input: {
+    visibility?: string;
+    status?: string;
+    confirmed?: boolean;
+    recipientEmail?: string;
+  },
 ) {
   return db.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM "Pet" WHERE id = ${id}::uuid AND "ownerId" = ${ownerId}::uuid FOR UPDATE`;
@@ -57,7 +64,7 @@ export async function setPetState(
     if (!pet) throw new HttpError(404, "Pet not found.");
     const data: {
       visibility?: "PUBLIC" | "PRIVATE";
-      status?: "ACTIVE" | "ARCHIVED" | "DECEASED";
+      status?: "ACTIVE" | "ARCHIVED" | "DECEASED" | "REHOMED";
       deceasedAt?: Date | null;
     } = {};
     if (input.visibility) {
@@ -74,9 +81,39 @@ export async function setPetState(
       data.visibility = input.visibility as "PUBLIC" | "PRIVATE";
     }
     if (input.status) {
-      if (!["ACTIVE", "ARCHIVED", "DECEASED"].includes(input.status))
+      if (!["ACTIVE", "ARCHIVED", "DECEASED", "REHOMED"].includes(input.status))
         throw new HttpError(400, "Choose a valid pet status.");
-      data.status = input.status as "ACTIVE" | "ARCHIVED" | "DECEASED";
+      if (input.status === "REHOMED") {
+        if (!input.confirmed)
+          throw new HttpError(400, "Confirm the transfer status first.");
+        const email =
+          typeof input.recipientEmail === "string"
+            ? input.recipientEmail.trim().toLowerCase()
+            : "";
+        if (!email || email.length > 254)
+          throw new HttpError(
+            400,
+            "Enter the new owner’s Petish email address, or share a PDF summary instead.",
+          );
+        const recipient = await tx.user.findFirst({
+          where: {
+            email: { equals: email, mode: "insensitive" },
+            emailVerified: true,
+          },
+          select: { id: true },
+        });
+        if (!recipient || recipient.id === ownerId)
+          throw new HttpError(
+            400,
+            "Use another owner’s verified Petish account. If they do not have one, download and share a PDF summary instead.",
+          );
+        await tx.healthSummaryShare.updateMany({
+          where: { snapshot: { petId: id }, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+      }
+      data.status = input.status as
+        "ACTIVE" | "ARCHIVED" | "DECEASED" | "REHOMED";
       if (input.status !== "ACTIVE") data.visibility = "PRIVATE";
       data.deceasedAt = input.status === "DECEASED" ? new Date() : null;
     }

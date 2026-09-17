@@ -48,6 +48,8 @@ type Pet = {
   markings: string | null;
   microchip: string | null;
   neutered: string;
+  careType: "INHOUSE" | "CARE_STRAY";
+  normalLocation: string | null;
   area: string | null;
   description: string | null;
   visibility: string;
@@ -107,13 +109,15 @@ function Status({ pet }: { pet: Pet }) {
       ) : (
         <LockKeyhole size={12} />
       )}{" "}
-      {pet.status === "DECEASED"
-        ? "In loving memory"
-        : pet.status === "ARCHIVED"
-          ? "Archived"
-          : pet.visibility === "PUBLIC"
-            ? "Public"
-            : "Private"}
+      {pet.status === "REHOMED"
+        ? "Transferred to new owner"
+        : pet.status === "DECEASED"
+          ? "In loving memory"
+          : pet.status === "ARCHIVED"
+            ? "Archived"
+            : pet.visibility === "PUBLIC"
+              ? "Public"
+              : "Private"}
     </span>
   );
 }
@@ -194,6 +198,7 @@ export default function PetishApp({
     [toast, setToast] = useState(""),
     [filter, setFilter] = useState("all"),
     [search, setSearch] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [modal, setModal] = useState<"photos" | "privacy" | "lifecycle" | null>(
       null,
     ),
@@ -261,13 +266,22 @@ export default function PetishApp({
       setBusy(false);
     }
   }
+  const careStrays = pets.filter(
+    (p) =>
+      p.careType === "CARE_STRAY" &&
+      !["REHOMED", "DECEASED"].includes(p.status),
+  );
   const activePets = pets.filter((p) => p.status === "ACTIVE");
   const selectedPets = pets.filter(
     (p) =>
-      (filter === "archived"
-        ? p.status !== "ACTIVE"
-        : p.status === "ACTIVE" &&
-          (filter === "all" || p.species === filter)) &&
+      (filter === "rehomed"
+        ? p.status === "REHOMED"
+        : filter === "deceased"
+          ? p.status === "DECEASED"
+          : filter === "archived"
+            ? p.status === "ARCHIVED"
+            : p.status === "ACTIVE" &&
+              (filter === "all" || p.species === filter)) &&
       `${p.name} ${p.breed || ""}`.toLowerCase().includes(search.toLowerCase()),
   );
   const nav = [
@@ -295,7 +309,7 @@ export default function PetishApp({
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      <aside className="sidebar">
+      <aside className="sidebar" aria-label="Account navigation">
         <Link href="/app" className="brand">
           <PawPrint />
           petish<span>®</span>
@@ -316,6 +330,20 @@ export default function PetishApp({
             </Link>
           ))}
         </nav>
+        <button
+          className="sidebar-signout"
+          onClick={async () => {
+            const result = await authClient.signOut();
+            if (result.error) {
+              setError("Could not sign out. Please try again.");
+              return;
+            }
+            router.replace("/login");
+            router.refresh();
+          }}
+        >
+          <LogOut size={20} /> Sign out
+        </button>
         <div className="sidebar-bottom">
           <div className="sidebar-note">
             <Heart size={23} />
@@ -363,7 +391,7 @@ export default function PetishApp({
           </div>
         </header>
         <main className="main-content" id="main-content">
-          {error && (
+          {error && modal !== "lifecycle" && (
             <div className="error error-banner" role="alert">
               {error}
               <button
@@ -465,6 +493,24 @@ export default function PetishApp({
                   </Link>
                 )}
               </div>
+              {careStrays.length > 0 && (
+                <section aria-label="Care strays" className="care-strays-home">
+                  <div className="section-heading">
+                    <div>
+                      <h2>
+                        Care strays{" "}
+                        <span className="count">{careStrays.length}</span>
+                      </h2>
+                      <p>The familiar faces you look out for.</p>
+                    </div>
+                  </div>
+                  <div className="pet-grid">
+                    {careStrays.map((p) => (
+                      <PetCard pet={p} key={p.id} />
+                    ))}
+                  </div>
+                </section>
+              )}
               {activePets.length > 0 && (
                 <section className="home-health-card">
                   <h2>A little care, kept together.</h2>
@@ -575,11 +621,11 @@ export default function PetishApp({
                   <div className="detail-intro-top">
                     <Status pet={pet} />
                     <button
-                      className="icon-button"
+                      className="button secondary"
                       aria-label="Pet settings"
                       onClick={() => setModal("lifecycle")}
                     >
-                      <Ellipsis />
+                      <Ellipsis size={18} /> Status
                     </button>
                   </div>
                   <span className="eyebrow">YOUR ONE OF A KIND</span>
@@ -666,6 +712,20 @@ export default function PetishApp({
                       </dd>
                     </div>
                     <div>
+                      <dt>Care</dt>
+                      <dd>
+                        {pet.careType === "CARE_STRAY"
+                          ? "Care stray"
+                          : "Inhouse"}
+                      </dd>
+                    </div>
+                    {pet.careType === "CARE_STRAY" && (
+                      <div>
+                        <dt>Normal location</dt>
+                        <dd>{pet.normalLocation || "Not recorded"}</dd>
+                      </div>
+                    )}
+                    <div>
                       <dt>Colour</dt>
                       <dd>{pet.colour || "Not recorded"}</dd>
                     </div>
@@ -735,7 +795,9 @@ export default function PetishApp({
                     ["all", "All pets"],
                     ["DOG", "Dogs"],
                     ["CAT", "Cats"],
-                    ["archived", "Archived & memories"],
+                    ["archived", "Archived"],
+                    ["rehomed", "Rehomed"],
+                    ["deceased", "Deceased"],
                   ].map(([v, l]) => (
                     <button
                       key={v}
@@ -906,7 +968,12 @@ export default function PetishApp({
         </Modal>
       )}
       {modal === "lifecycle" && pet && (
-        <Modal title={`${pet.name}’s settings`} onClose={() => setModal(null)}>
+        <Modal title={`${pet.name}’s status`} onClose={() => setModal(null)}>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
           <p className="modal-description">
             Archiving keeps the profile and photos, and removes it from your
             active pets. Memorial profiles also become private.
@@ -932,6 +999,53 @@ export default function PetishApp({
                 ? "Archive this pet"
                 : "Restore to active pets"}
             </button>
+            {pet.status !== "REHOMED" && pet.status !== "DECEASED" && (
+              <div className="rehoming-controls">
+                <label>
+                  New owner’s Petish email
+                  <input
+                    type="email"
+                    value={recipientEmail}
+                    onChange={(e) => setRecipientEmail(e.target.value)}
+                    placeholder="Their verified Petish account email"
+                    maxLength={254}
+                  />
+                </label>
+                <p className="fine-print">
+                  Records a rehomed status after checking their account. Your
+                  records stay in your account. If they do not have Petish,
+                  share a PDF instead.
+                </p>
+                <Link
+                  className="text-link"
+                  href={`/app/pets/${pet.id}/health/shares/new`}
+                  onClick={() => setModal(null)}
+                >
+                  Prepare PDF summary
+                </Link>
+                <button
+                  className="button secondary"
+                  disabled={busy}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Record this pet as rehomed? It will leave Home, remain in your Rehomed list, and its existing sharing links will be revoked. Records stay in your account.",
+                      )
+                    )
+                      void action(async () => {
+                        await api(`/api/pets/${pet.id}/state`, "PATCH", {
+                          status: "REHOMED",
+                          recipientEmail,
+                          confirmed: true,
+                        });
+                        setModal(null);
+                      }, "Transfer recorded. Shared links revoked.");
+                  }}
+                >
+                  Transfer to new owner
+                </button>
+              </div>
+            )}
             {pet.status !== "DECEASED" && (
               <button
                 className="button secondary"
@@ -967,6 +1081,7 @@ function PetForm({
   onSaved: (p: Pet) => Promise<void>;
 }) {
   const [name, setName] = useState(pet?.name || ""),
+    [careType, setCareType] = useState(pet?.careType || "INHOUSE"),
     [species, setSpecies] = useState(pet?.species || "DOG"),
     [sex, setSex] = useState(pet?.sex || "UNKNOWN"),
     [precision, setPrecision] = useState(pet?.birthPrecision || "UNKNOWN"),
@@ -997,6 +1112,8 @@ function PetForm({
         birthPrecision: precision,
         birthDate: date,
         ageEntry: precision === "UNKNOWN" ? "" : `${precision}: ${date}`,
+        careType,
+        normalLocation: String(form.get("normalLocation") || ""),
         breed: String(form.get("breed") || ""),
         mixedBreed: form.get("mixedBreed") === "on",
         colour: String(form.get("colour") || ""),
@@ -1184,8 +1301,33 @@ function PetForm({
         )}
         <details className="optional-details" open={!!pet}>
           <summary>
-            A few more little details <span>All optional</span>
+            The little details <span>Care and optional details</span>
           </summary>
+          <label>
+            Care arrangement
+            <select
+              name="careType"
+              value={careType}
+              onChange={(e) =>
+                setCareType(e.target.value as "INHOUSE" | "CARE_STRAY")
+              }
+            >
+              <option value="INHOUSE">Inhouse</option>
+              <option value="CARE_STRAY">Care stray</option>
+            </select>
+          </label>
+          {careType === "CARE_STRAY" && (
+            <label>
+              Normal location <small>Private · required</small>
+              <input
+                name="normalLocation"
+                required
+                maxLength={200}
+                defaultValue={pet?.normalLocation || ""}
+                placeholder="Where you usually find or care for this stray"
+              />
+            </label>
+          )}
           <div className="form-grid">
             <label>
               Breed

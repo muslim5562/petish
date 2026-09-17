@@ -142,7 +142,7 @@ export default function PwaProvider({
     >
       {children}
       {offline && (
-        <aside className="pwa-connection" role="status">
+        <div className="pwa-connection" role="status">
           <WifiOff size={20} />
           <div>
             <strong>Connection lost</strong>
@@ -151,10 +151,10 @@ export default function PwaProvider({
               changes are not queued for later.
             </p>
           </div>
-        </aside>
+        </div>
       )}
       {waiting && !offline && (
-        <aside className="pwa-connection pwa-update" role="status">
+        <div className="pwa-connection pwa-update" role="status">
           <RefreshCw size={20} />
           <div>
             <strong>An update is ready</strong>
@@ -175,7 +175,7 @@ export default function PwaProvider({
           >
             Update and reload
           </button>
-        </aside>
+        </div>
       )}
     </Context.Provider>
   );

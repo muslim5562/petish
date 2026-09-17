@@ -82,6 +82,7 @@ enum Visibility {
   PUBLIC
 }
 enum LifeStatus {
+  REHOMED
   ACTIVE
   ARCHIVED
   DECEASED
@@ -103,6 +104,8 @@ model Pet {
   markings String?
   microchip String?
   neutered String @default("UNKNOWN")
+  careType String @default("INHOUSE")
+  normalLocation String?
   area String?
   description String?
   visibility Visibility @default(PRIVATE)

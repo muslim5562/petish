@@ -21,7 +21,13 @@ export async function summaryPdf(
     page = doc.addPage([595.28, 841.89]);
     y = 783;
   }
-  function text(value: string, size = 10.5, heavy = false, gap = 7) {
+  function text(
+    value: string,
+    size = 10.5,
+    heavy = false,
+    gap = 7,
+    ink = color,
+  ) {
     const font = heavy ? bold : regular;
     const clean = value.replace(/\r\n?/g, "\n").replace(/\t/g, "    ");
     for (const c of clean)
@@ -52,7 +58,7 @@ export async function summaryPdf(
     }
     for (const line of lines) {
       if (y < 65) next();
-      page.drawText(line, { x: left, y, size, font, color });
+      page.drawText(line, { x: left, y, size, font, color: ink });
       y -= size * 1.45;
     }
     y -= gap;
@@ -60,13 +66,29 @@ export async function summaryPdf(
   function heading(value: string) {
     if (y < 135) next();
     y -= 7;
-    text(value, 14, true, 9);
+    text(value, 14, true, 9, rgb(0.43, 0.23, 0.36));
   }
   doc.setTitle("Petish health summary");
   doc.setAuthor("Petish");
   doc.setSubject("Owner-selected health summary snapshot");
-  text("petish / HEALTH SUMMARY", 11, true, 14);
-  text(content.heading, 23, true, 12);
+  const headerTop = 805;
+  const titleRows = Math.max(
+    1,
+    Math.ceil(bold.widthOfTextAtSize(content.heading, 20) / width),
+  );
+  const headerHeight = 50 + (titleRows === 1 ? 1 : titleRows + 1) * 29;
+  page.drawRectangle({
+    x: 34,
+    y: headerTop - headerHeight,
+    width: 527,
+    height: headerHeight,
+    color: rgb(0.95, 0.92, 0.96),
+    borderColor: rgb(0.55, 0.38, 0.56),
+    borderWidth: 1,
+  });
+  text("petish / HEALTH SUMMARY", 10, true, 12, rgb(0.43, 0.23, 0.36));
+  text(content.heading, 20, true, 12, rgb(0.25, 0.15, 0.29));
+  y = headerTop - headerHeight - 25;
   text("Snapshot captured: " + new Date(content.capturedAt).toISOString(), 9);
   if (content.lastUpdated)
     text(

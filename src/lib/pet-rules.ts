@@ -22,10 +22,18 @@ export const petInput = z
     markings: optionalText(500),
     microchip: optionalText(40),
     neutered: z.enum(["YES", "NO", "UNKNOWN"]).default("UNKNOWN"),
+    careType: z.enum(["INHOUSE", "CARE_STRAY"]).default("INHOUSE"),
+    normalLocation: optionalText(200),
     area: optionalText(100),
     description: optionalText(600),
   })
   .superRefine((v, ctx) => {
+    if (v.careType === "CARE_STRAY" && !v.normalLocation)
+      ctx.addIssue({
+        code: "custom",
+        path: ["normalLocation"],
+        message: "Enter the care stray’s normal location.",
+      });
     if (v.birthPrecision === "UNKNOWN") return;
     const value = v.birthDate || "";
     const d = new Date(value + "T00:00:00Z");

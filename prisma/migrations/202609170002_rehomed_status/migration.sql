@@ -1,0 +1,1 @@
+ALTER TYPE "LifeStatus" ADD VALUE 'REHOMED';
