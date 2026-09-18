@@ -13,14 +13,32 @@ export async function GET(req: Request, ctx: Context) {
   try {
     const { user } = await sessionFor(req);
     const [id, action] = (await ctx.params).path || [];
-    if (!id)
-      return json(
-        await db.pet.findMany({
+    if (!id) {
+      const [pets, reports] = await Promise.all([
+        db.pet.findMany({
           where: { ownerId: user.id },
           include: { images: { orderBy: { createdAt: "asc" } } },
           orderBy: { createdAt: "asc" },
         }),
+        db.boardReport.findMany({
+          where: {
+            ownerId: user.id,
+            kind: "MISSING",
+            state: "OPEN",
+            confirmedAt: { gte: new Date(Date.now() - 60 * 86400000) },
+          },
+          select: { id: true, petId: true },
+        }),
+      ]);
+      return json(
+        pets.map((p) => ({
+          ...p,
+          missingReportId: ["REHOMED", "DECEASED"].includes(p.status)
+            ? null
+            : reports.find((r) => r.petId === p.id)?.id || null,
+        })),
       );
+    }
     const pet = await ownedPet(user.id, id);
     return json(action === "preview" ? publicProjection(pet) : pet);
   } catch (e) {

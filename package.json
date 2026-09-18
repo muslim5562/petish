@@ -23,7 +23,8 @@
     "cleanup:health": "tsx scripts/cleanup-health.ts",
     "prebuild": "node scripts/stamp-pwa.mjs",
     "preview:phone": "node scripts/phone-preview.mjs",
-    "cleanup:shares": "tsx scripts/cleanup-share-drafts.ts"
+    "cleanup:shares": "tsx scripts/cleanup-share-drafts.ts",
+    "maintain:board": "tsx scripts/maintain-board.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1000.0",

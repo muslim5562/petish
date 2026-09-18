@@ -47,6 +47,13 @@ const config: NextConfig = {
         ],
       },
       {
+        source: "/lost-found/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+        ],
+      },
+      {
         source: "/app/:path*",
         headers: [
           { key: "Cache-Control", value: "private, no-store, max-age=0" },

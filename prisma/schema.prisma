@@ -337,3 +337,101 @@ model HealthSummaryShare {
   revokedAt DateTime?
   @@index([expiresAt,revokedAt])
 }
+
+model BoardReport {
+  id String @id @default(uuid()) @db.Uuid
+  kind String
+  state String @default("PENDING")
+  ownerId String? @db.Uuid
+  petId String? @db.Uuid
+  email String
+  petName String?
+  species String
+  breed String?
+  colour String?
+  details String
+  locality String
+  occurredAt DateTime @db.Date
+  approximateTime String?
+  custody String?
+  phone String?
+  publicPhone Boolean @default(false)
+  reward String?
+  photoReuse Boolean @default(false)
+  confirmedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  closedAt DateTime?
+  closureReason String?
+  remindedAt DateTime?
+  importedPetId String? @db.Uuid
+  responses BoardResponse[]
+  photos BoardPhoto[]
+  access BoardAccess[]
+  flags BoardFlag[]
+  @@index([state,confirmedAt])
+  @@index([ownerId,createdAt])
+}
+model BoardResponse {
+  id String @id @default(uuid()) @db.Uuid
+  reportId String @db.Uuid
+  report BoardReport @relation(fields:[reportId],references:[id],onDelete:Cascade)
+  email String
+  verified Boolean @default(false)
+  kind String
+  locality String
+  occurredAt DateTime @db.Date
+  details String
+  phone String?
+  createdAt DateTime @default(now())
+  photos BoardPhoto[]
+  access BoardAccess[]
+  @@index([reportId,createdAt])
+}
+model BoardPhoto {
+  id String @id @default(uuid()) @db.Uuid
+  reportId String @db.Uuid
+  report BoardReport @relation(fields:[reportId],references:[id],onDelete:Cascade)
+  responseId String? @db.Uuid
+  response BoardResponse? @relation(fields:[responseId],references:[id],onDelete:Cascade)
+  objectKey String @unique
+  thumbKey String @unique
+  bytes Int
+}
+model BoardAccess {
+  id String @id @default(uuid()) @db.Uuid
+  tokenHash String @unique @db.VarChar(64)
+  reportId String @db.Uuid
+  report BoardReport @relation(fields:[reportId],references:[id],onDelete:Cascade)
+  responseId String? @db.Uuid
+  response BoardResponse? @relation(fields:[responseId],references:[id],onDelete:Cascade)
+  kind String
+  email String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+model BoardNotification {
+  id String @id @default(uuid()) @db.Uuid
+  ownerId String? @db.Uuid
+  reportId String @db.Uuid
+  email String
+  subject String
+  sentAt DateTime?
+  readAt DateTime?
+  attempts Int @default(0)
+  createdAt DateTime @default(now())
+  @@index([ownerId,readAt])
+}
+model BoardFlag {
+  id String @id @default(uuid()) @db.Uuid
+  reportId String @db.Uuid
+  report BoardReport @relation(fields:[reportId],references:[id],onDelete:Cascade)
+  reason String
+  state String @default("OPEN")
+  createdAt DateTime @default(now())
+}
+model BoardRate {
+  id String @id
+  count Int @default(0)
+  expiresAt DateTime
+}

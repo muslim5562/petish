@@ -3,6 +3,7 @@ import "./globals.css";
 import "./health.css";
 import "./pwa.css";
 import "./sharing.css";
+import "./lost-found.css";
 import PwaProvider from "@/components/pwa-provider";
 export const metadata: Metadata = {
   title: "Petish · A little home for your pets",

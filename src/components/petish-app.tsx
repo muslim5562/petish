@@ -31,11 +31,13 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { ageLabel } from "@/lib/pet-rules";
 import HealthSpace from "./health-space";
+import BoardNavLink from "./board-nav-link";
 import PublicCard, { type PublicPet } from "./public-card";
 type Photo = { id: string; view: string };
 type Pet = {
   id: string;
   publicId: string;
+  missingReportId?: string | null;
   name: string;
   species: "CAT" | "DOG";
   sex: string;
@@ -102,6 +104,8 @@ function IconPhoto({ pet, thumb = false }: { pet: Pet; thumb?: boolean }) {
   );
 }
 function Status({ pet }: { pet: Pet }) {
+  if (pet.missingReportId && !["REHOMED", "DECEASED"].includes(pet.status))
+    return <span className="missing-marker">Missing · report open</span>;
   return (
     <span className={`status ${pet.visibility === "PUBLIC" ? "public" : ""}`}>
       {pet.visibility === "PUBLIC" ? (
@@ -329,6 +333,7 @@ export default function PetishApp({
               )}
             </Link>
           ))}
+          <BoardNavLink />
         </nav>
         <button
           className="sidebar-signout"
@@ -674,7 +679,22 @@ export default function PetishApp({
                   </div>
                 </div>
               </div>
-              <div className="pet-health-link">
+              <div className="pet-health-link button-row">
+                {!["REHOMED", "DECEASED"].includes(pet.status) && (
+                  <Link
+                    className="button secondary"
+                    href={
+                      pet.missingReportId
+                        ? `/lost-found/manage?id=${pet.missingReportId}`
+                        : `/lost-found/new?pet=${pet.id}`
+                    }
+                  >
+                    <Search size={19} />
+                    {pet.missingReportId
+                      ? "Manage missing report"
+                      : "Report missing"}
+                  </Link>
+                )}
                 <Link
                   className="button primary"
                   href={`/app/pets/${pet.id}/health`}
@@ -866,6 +886,10 @@ export default function PetishApp({
         </main>
       </div>
       <nav className="bottom-nav">
+        <Link href="/lost-found">
+          <Search size={21} />
+          <span>Lost &amp; Found</span>
+        </Link>
         {nav.map((n) => (
           <Link key={n.href} href={n.href} className={n.active ? "active" : ""}>
             <n.icon size={22} />

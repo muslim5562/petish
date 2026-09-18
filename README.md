@@ -114,3 +114,7 @@ Phase 2 is implemented. See `docs/PHASE2.md` for acceptance evidence, privacy ru
 The PWA and a temporary HTTPS phone preview are now implemented. Open /install for Android and iPhone instructions. See docs/PWA.md for the current preview address, restart steps, privacy/cache behaviour, verification results and permanent-hosting preparation. No domain or hosting account is required for the temporary preview. Use sample data only in the shared preview.
 
 
+
+## Lost & Found bulletin board
+
+Open /lost-found, or choose Lost & Found from the Petish sidebar. Report a missing pet from its profile, post found pets without an account, verify private sightings by email, close cases into private history, and invite a reunited owner to add a pet profile. See [Lost & Found operation and testing](docs/LOST_FOUND.md) for email, moderation, inactivity, and privacy details.

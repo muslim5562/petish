@@ -14,6 +14,9 @@ export default function Landing() {
           <PawPrint />
           petish<span>®</span>
         </Link>
+        <Link className="text-link" href="/lost-found">
+          Lost &amp; Found
+        </Link>
         <Link className="button secondary" href="/login">
           Sign in <ArrowUpRight size={18} />
         </Link>

@@ -1,5 +1,5 @@
 /* Only this generic fallback is stored. No runtime page, API, photo or RSC caching. */
-const CACHE = "petish-offline-e1b93851a237";
+const CACHE = "petish-offline-42dd315f8da3";
 const OFFLINE='/offline.html';
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(async cache=>{const response=await fetch(OFFLINE,{cache:'reload',credentials:'omit'});if(!response.ok)throw new Error('Offline screen unavailable');await cache.put(OFFLINE,response);}));});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('petish-offline-')&&key!==CACHE)await caches.delete(key);await self.clients.claim();})());});
