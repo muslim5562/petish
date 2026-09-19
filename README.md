@@ -118,3 +118,7 @@ The PWA and a temporary HTTPS phone preview are now implemented. Open /install f
 ## Lost & Found bulletin board
 
 Open /lost-found, or choose Lost & Found from the Petish sidebar. Report a missing pet from its profile, post found pets without an account, verify private sightings by email, close cases into private history, and invite a reunited owner to add a pet profile. See [Lost & Found operation and testing](docs/LOST_FOUND.md) for email, moderation, inactivity, and privacy details.
+
+## Additional sample accounts
+
+Run `npx tsx scripts/seed-sample-accounts.ts` in the local installation to add Aisha Rahman (3 pets), Farid Hassan (10 pets), and fictional Lost & Found cases. Use normal email/password sign-in; credentials are saved only in the ignored `.local/sample-accounts.txt` file. Re-running preserves existing sample records and passwords without adding duplicates. This script refuses nonlocal databases and never sends email. Sample records are local database content, not part of GitHub deployment.
