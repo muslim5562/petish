@@ -198,12 +198,16 @@ export default function LostFound() {
   return (
     <div className="lf-shell">
       <header className="lf-nav">
-        <Link className="brand" href="/">
-          <PawPrint />
-          petish
-        </Link>
+        <div className="lf-brand-group">
+          <Link className="brand" href="/">
+            <PawPrint />
+            petish
+          </Link>
+          <Link className="lf-brand-title" href="/lost-found">
+            Lost &amp; Found
+          </Link>
+        </div>
         <nav aria-label="Lost and found">
-          <Link href="/lost-found">Bulletin board</Link>
           <Link href="/lost-found/manage">
             My reports{" "}
             {meta && meta.unread > 0 && (

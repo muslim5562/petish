@@ -571,4 +571,32 @@
   }
 }
 
-.lf-detail-grid .lf-photos {margin-bottom:20px;} .lf-detail-grid aside>.button {margin-bottom:16px;}
+.lf-detail-grid .lf-photos {
+  margin-bottom: 20px;
+}
+.lf-detail-grid aside > .button {
+  margin-bottom: 16px;
+}
+
+.lf-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+.lf-brand-title {
+  font-family: "Manrope", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .lf-brand-group {
+    gap: 14px;
+  }
+  .lf-brand-title {
+    font-size: 1.25rem;
+  }
+}
