@@ -1953,9 +1953,6 @@ label > small {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 13px;
   }
-  .home-grid .pet-card:last-of-type:nth-child(3) {
-    display: none;
-  }
   .pet-card {
     padding: 6px;
     border-radius: 15px;

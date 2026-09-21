@@ -276,6 +276,7 @@ export default function PetishApp({
       !["REHOMED", "DECEASED"].includes(p.status),
   );
   const activePets = pets.filter((p) => p.status === "ACTIVE");
+  const inhousePets = activePets.filter((p) => p.careType === "INHOUSE");
   const selectedPets = pets.filter(
     (p) =>
       (filter === "rehomed"
@@ -472,7 +473,8 @@ export default function PetishApp({
               <div className="section-heading">
                 <div>
                   <h2>
-                    My pets <span className="count">{activePets.length}</span>
+                    Inhouse pets{" "}
+                    <span className="count">{inhousePets.length}</span>
                   </h2>
                   <p>A whole lot of personality.</p>
                 </div>
@@ -481,16 +483,16 @@ export default function PetishApp({
                 </Link>
               </div>
               <div className="pet-grid home-grid">
-                {activePets.slice(0, 3).map((p) => (
+                {inhousePets.map((p) => (
                   <PetCard pet={p} key={p.id} />
                 ))}
-                {activePets.length < 3 && (
+                {inhousePets.length < 3 && (
                   <Link href="/app/pets/new" className="add-pet-card">
                     <span>
                       <Plus size={26} />
                     </span>
                     <h3>
-                      {activePets.length
+                      {inhousePets.length
                         ? "Room for one more?"
                         : "Let’s add your first pet."}
                     </h3>
