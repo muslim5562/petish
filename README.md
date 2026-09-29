@@ -122,3 +122,7 @@ Open /lost-found, or choose Lost & Found from the Petish sidebar. Report a missi
 ## Additional sample accounts
 
 Run `npx tsx scripts/seed-sample-accounts.ts` in the local installation to add Aisha Rahman (3 pets), Farid Hassan (10 pets), and fictional Lost & Found cases. Use normal email/password sign-in; credentials are saved only in the ignored `.local/sample-accounts.txt` file. Re-running preserves existing sample records and passwords without adding duplicates. This script refuses nonlocal databases and never sends email. Sample records are local database content, not part of GitHub deployment.
+
+## DigitalOcean deployment
+
+See [Deploy from GitHub to DigitalOcean](docs/DIGITALOCEAN.md). The `.do/app.yaml` template uses App Platform, external managed PostgreSQL, private Spaces uploads, and HTTPS transactional email. Set cloud secrets before deployment; local sample data is not uploaded automatically.
