@@ -890,7 +890,7 @@ export default function PetishApp({
       <nav className="bottom-nav">
         <Link href="/lost-found">
           <Search size={21} />
-          <span>Lost &amp; Found</span>
+          <span>Petfinder</span>
         </Link>
         {nav.map((n) => (
           <Link key={n.href} href={n.href} className={n.active ? "active" : ""}>
@@ -1015,6 +1015,7 @@ export default function PetishApp({
                       status: pet.status === "ACTIVE" ? "ARCHIVED" : "ACTIVE",
                     });
                     setModal(null);
+                    if (pet.status === "ACTIVE") router.push("/app/pets");
                   },
                   pet.status === "ACTIVE" ? "Pet archived." : "Pet restored.",
                 )
@@ -1087,6 +1088,7 @@ export default function PetishApp({
                         status: "DECEASED",
                       });
                       setModal(null);
+                      router.push("/app/pets");
                     }, "A place in your memories, always.");
                 }}
               >

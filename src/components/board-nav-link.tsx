@@ -25,7 +25,7 @@ export default function BoardNavLink() {
   return (
     <Link className="board-sidebar-link" href="/lost-found">
       <Search size={21} />
-      Lost &amp; Found
+      Petfinder
       {unread > 0 && (
         <span
           className="lf-count"

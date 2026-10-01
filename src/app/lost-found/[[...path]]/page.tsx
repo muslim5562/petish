@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import LostFound from "@/components/lost-found";
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Lost & Found | Petish",
+  title: "Petfinder | Petish",
   robots: { index: false, follow: false },
   referrer: "no-referrer" as const,
 };

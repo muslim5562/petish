@@ -204,10 +204,10 @@ export default function LostFound() {
             petish
           </Link>
           <Link className="lf-brand-title" href="/lost-found">
-            Lost &amp; Found
+            Petfinder
           </Link>
         </div>
-        <nav aria-label="Lost and found">
+        <nav aria-label="Petfinder">
           <Link href="/lost-found/manage">
             My reports{" "}
             {meta && meta.unread > 0 && (
